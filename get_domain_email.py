@@ -22,7 +22,6 @@ def scroll_down():
                 break
         last_height = new_height
 
-
 def get_urls(min_da, max_da):
     urls = []
     serp_listings = WebDriverWait(driver, 5).until(
@@ -43,7 +42,6 @@ def get_urls(min_da, max_da):
     return urls
 
 if (__name__ == '__main__'):
-
     chrome_options = Options()
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-gpu")
@@ -57,64 +55,46 @@ if (__name__ == '__main__'):
 
     driver = webdriver.Chrome(service=service, options=chrome_options)
 
-    # d={}
-
     search_queries = [
-    '"gym owners" + "business email" -site:facebook.com',
-    '"personal trainer" + "contact" + email -site:instagram.com',
-    '"fitness studio" + "email address" -site:twitter.com',
-    '"health and wellness" + "business contact" -site:youtube.com',
-    '"fitness professionals" + "email directory" -site:pinterest.com',
-    '"gym contact information" + email -site:linkedin.com -site:facebook.com',
-    '"fitness industry" + "staff emails" -site:instagram.com -site:twitter.com',
-    '"fitness clubs" + "owner email" -site:youtube.com -site:pinterest.com',
-    '"fitness workshops" + "email contact" -site:linkedin.com -site:facebook.com',
-    '"boxing gym owner" + contact',
-    '"aerobics instructor" + "email address"',
-    '"fitness blogger" + "contact info"',
-    '"strength and conditioning coach" + email',
-    '"group fitness instructor" + "contact"',
-    '"outdoor fitness" + "owner contact"',
-    '"fitness app developer" + "business contact"',
-    '"athletic trainer" + "contact information"',
-    '"cycling instructor" + "business email"',
-    '"fitness equipment supplier" + contact',
-    '"sports therapist" + "business contact"',
-    '"mobility coach" + "contact information"',
-    '"fitness podcast host" + email',
-    '"virtual fitness coach" + "contact info"',
-    '"bodybuilding coach" + "business email"',
-    '"swim coach" + "contact information"',
-    '"fitness consultant" + "business contact"',
-    '"nutrition consultant" + "email address"'
+
+    '"climbing coach"',
+    '"skiing instructor"',
+    '"snowboarding instructor"',
+    '"surfing coach"',
+    '"kettlebell training specialist"',
+    '"mobility coach"',
+    '"pre and postnatal fitness coach"',
     ]
 
 
-    with open("email_out/emails.csv", 'w', newline="") as f:
+    # Change the mode to 'a' for appending data to the existing CSV file.
+    with open("email_out/emails.csv", 'a', newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(['emails'])
 
         for query in search_queries:
-            time.sleep(random.randrange(1, 5))
-
+            driver.get(f"https://www.google.com/search?q={query}")
+            scroll_down()
             try:
-                driver.get(f"https://www.google.com/search?q={query}")
-                scroll_down()
-                urls=get_urls(0, 61)
+                
+                urls = get_urls(15, 61)
 
                 for url in urls:
                     try:
                         driver.get(url)
+                        time.sleep(0.5)
                         domain = url.split("//")[-1].split("/")[0]
                         regex = r"[a-zA-Z0-9._%+-]+@" + re.escape(domain)
                         html = driver.page_source
                         emails = list(set(re.findall(regex, html)))
-                        if (emails):writer.writerow(emails)
+                        print(emails)
+                        if emails:
+                            # Open the CSV file in append mode here within the loop
+                            with open("email_out/emails.csv", 'a', newline="") as f:
+                                writer = csv.writer(f)
+                                writer.writerow(emails)
                     except Exception:
                         continue
             except Exception:
                 continue
 
-
-time.sleep(999)
-driver.quit()
+    driver.quit()
